@@ -1,9 +1,7 @@
 import pymongo
 from pprint import pprint
 
-# Conéctate a la base de datos
-cliente = pymongo.MongoClient("mongodb://localhost:27017/")
-db = cliente["mi_base_de_datos"]
+
 
 class Cuenta(): 
     def __init__(self,  titular : str , nip: int, saldo: float) -> None:
@@ -32,19 +30,30 @@ class Cuenta():
 
 if __name__ == "__main__":
 
+    # Conéctate a la base de datos
+    cliente = pymongo.MongoClient("mongodb://localhost:27017/")
+    db = cliente["banco_distribuidos"]
+
     andy = Cuenta("Andrea", 123, 500)
+    datos_andy = vars(andy)
 
-    pprint(vars(andy))
+    # Guarda el diccionario en la base de datos
+    coleccion = db["Cuentas"]
+    coleccion.insert_one(datos_andy)
 
-    print(andy.retira(600, 123))
-    print(andy.retira(10, 321))
-    print(andy.retira(-10, 123))
-    print(andy.retira(10, 123))
+    cliente.close()
 
-    pprint(vars(andy))
+    # pprint(vars(andy))
+
+    # print(andy.retira(600, 123))
+    # print(andy.retira(10, 321))
+    # print(andy.retira(-10, 123))
+    # print(andy.retira(10, 123))
+
+    # pprint(vars(andy))
 
 
-    print(andy.deposita(-20))
-    print(andy.deposita(20))
+    # print(andy.deposita(-20))
+    # print(andy.deposita(20))
 
-    pprint(vars(andy))
+    # pprint(vars(andy))

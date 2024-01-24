@@ -1,12 +1,13 @@
 import pymongo
 from pprint import pprint
-
+import threading
 
 
 class Cuenta(): 
-    def __init__(self,  titular : str , nip: int, saldo: float) -> None:
+    def __init__(self,  titular : str , no_cuenta : int,  nip: int, saldo: float ) -> None:
         self.nip = nip
         self.saldo = saldo
+        self.no_cuenta = no_cuenta
         self.titular = titular
         
     def retira(self, cantidad : float, nip_recibido : int ):
@@ -27,33 +28,59 @@ class Cuenta():
             return None 
         
 
-
-if __name__ == "__main__":
-
+def crea_cuenta(titular: str, nip: int, saldo : float = 0):
     # Conéctate a la base de datos
     cliente = pymongo.MongoClient("mongodb://localhost:27017/")
     db = cliente["banco_distribuidos"]
-
-    andy = Cuenta("Andrea", 123, 500)
-    datos_andy = vars(andy)
-
-    # Guarda el diccionario en la base de datos
     coleccion = db["Cuentas"]
-    coleccion.insert_one(datos_andy)
+
+    cantidad_documentos = coleccion.count_documents({})
+
+    nueva_cuenta = vars(Cuenta(titular, cantidad_documentos+1, nip, saldo))
+    coleccion.insert_one(nueva_cuenta)
 
     cliente.close()
 
-    # pprint(vars(andy))
 
-    # print(andy.retira(600, 123))
-    # print(andy.retira(10, 321))
-    # print(andy.retira(-10, 123))
-    # print(andy.retira(10, 123))
+def transfiere(cuenta_origen: int, nip_origen: int, cuenta_destino: int, saldo : float):
+    cliente = pymongo.MongoClient("mongodb://localhost:27017/")
+    db = cliente["banco_distribuidos"]
+    coleccion = db["Cuentas"]
 
-    # pprint(vars(andy))
+    filtro = {"no_cuenta": {"$in": [cuenta_origen, cuenta_destino]}}
+
+    resultados = coleccion.find(filtro)
 
 
-    # print(andy.deposita(-20))
-    # print(andy.deposita(20))
+    cuentas_modificadas = []
 
-    # pprint(vars(andy))
+    for documento in resultados:
+        cuenta = Cuenta(
+            documento["titular"], documento["no_cuenta"], documento["nip"], documento["saldo"])
+        # Modifica la instancia según tus necesidades
+        if cuenta.no_cuenta == cuenta_origen:
+            envio = cuenta.retira(saldo, nip_origen)
+        elif cuenta.no_cuenta == cuenta_destino:
+            recivio = cuenta.deposita(saldo)
+            
+      
+        cuentas_modificadas.append(cuenta)
+
+    # Actualiza la base de datos con las instancias modificadas
+    if envio and recivio == True:
+        for cuenta_modificada in cuentas_modificadas:
+            coleccion.update_one({"no_cuenta": cuenta_modificada.no_cuenta}, {
+                                "$set": {"saldo": cuenta_modificada.saldo}})
+        return True
+    else:
+        return False
+
+if __name__ == "__main__":
+    print(transfiere(1, 123, 3, 200))
+    print(transfiere(2, 457, 3, 300))
+
+
+
+
+
+

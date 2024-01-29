@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banco Sistemas Dsitribuidos</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>Banco Sistemas Dsitribuidos</h1>
+    </header>
+
+    <section>
+        <h2>Seleccione una opción</h2>
+
+        <label for="opcion">Tipo de operación:</label>
+        <select id="opcion">
+            <option value="transferencia">Transferencia</option>
+            <option value="deposito">Depósito</option>
+        </select>
+
+        <div>
+            <label for="monto">Cuenta:</label>
+            <input type="number" id="cuenta" placeholder="Ingrese la cuenta" required>
+        </div>
+
+        <div>
+            <label for="monto">Monto:</label>
+            <input type="number" id="monto" placeholder="Ingrese el monto" required>
+                </div>
+
+        <button onclick="realizarOperacion()">Realizar Operación</button>
+    </section>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

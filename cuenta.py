@@ -66,10 +66,7 @@ def crea_cuenta(titular: str, nip: int, saldo : float = 0):
 
 
 
-
 if __name__ == "__main__":
-
-
     cliente = pymongo.MongoClient("mongodb://localhost:27017/")
     db = cliente["banco_distribuidos"]
     coleccion = db["Cuentas"]

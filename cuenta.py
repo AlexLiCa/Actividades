@@ -1,7 +1,7 @@
 import pymongo
 from pprint import pprint
 import threading
-
+import random
 
 class Cuenta(): 
     def __init__(self,  titular : str , no_cuenta : int,  nip: int, saldo: float ) -> None:
@@ -9,24 +9,47 @@ class Cuenta():
         self.saldo = saldo
         self.no_cuenta = no_cuenta
         self.titular = titular
+        self.lock_saldo = threading.Lock()
         
     def retira(self, cantidad : float, nip_recibido : int ):
-       if isinstance(nip_recibido, int) and isinstance(cantidad, (int, float)) and cantidad > 0:
-            if nip_recibido == self.nip and self.saldo >= cantidad:
-                self.saldo = self.saldo - cantidad
-                return True 
-            else:
-                return False
-       else : 
-           return None
+       with self.lock_saldo:
+        if isinstance(nip_recibido, int) and isinstance(cantidad, (int, float)) and cantidad > 0:
+                if nip_recibido == self.nip and self.saldo >= cantidad:
+                    self.saldo = self.saldo - cantidad
+                    return True 
+                else:
+                    return False
+        else : 
+            return None
 
     def deposita(self, cantidad: float):
-        if isinstance(cantidad, (float, int)) and cantidad > 0:
-            self.saldo += cantidad
+        with self.lock_saldo:
+            if isinstance(cantidad, (float, int)) and cantidad > 0:
+                self.saldo += cantidad
+                return True
+            else:
+                return None 
+    
+    def transfiere(self, cuenta_destino: 'Cuenta', monto : float, coleccion ):
+        if self.saldo >= monto:
+            self.saldo -= monto
+            cuenta_destino.deposita(monto)
+            #Actualizamos la cuenta original
+            coleccion.update_one({"no_cuenta": self.no_cuenta}, {
+                                            "$set": {"saldo": self.saldo}})
+            #Actualizamos la cuenta a la que depositamos
+            coleccion.update_one({"no_cuenta": cuenta_destino.no_cuenta}, {
+                                "$set": {"saldo": cuenta_destino.saldo}})
+            
+            print(f"{self.titular} transfirio {monto}. Saldo: {self.saldo} \n")
             return True
         else:
-            return None 
-        
+            print(f"{self.titular} no pudo transferir {monto}. \n")
+            return False
+
+
+def transferencia(cuenta_origen: "Cuenta", cuenta_destino:  "Cuenta", monto: float, coleccion):
+    return cuenta_origen.transfiere(cuenta_destino, monto, coleccion)
 
 def crea_cuenta(titular: str, nip: int, saldo : float = 0):
     # Conéctate a la base de datos
@@ -42,42 +65,59 @@ def crea_cuenta(titular: str, nip: int, saldo : float = 0):
     cliente.close()
 
 
-def transfiere(cuenta_origen: int, nip_origen: int, cuenta_destino: int, saldo : float):
+
+
+if __name__ == "__main__":
+
+
     cliente = pymongo.MongoClient("mongodb://localhost:27017/")
     db = cliente["banco_distribuidos"]
     coleccion = db["Cuentas"]
+    documentos = list(coleccion.find())
 
-    filtro = {"no_cuenta": {"$in": [cuenta_origen, cuenta_destino]}}
+    num_hilos = 20
+    hilos = []
 
-    resultados = coleccion.find(filtro)
+    for i in range(num_hilos):
+            # Seleccionar un documento aleatorio
+        documento_aleatorio = random.choice(documentos)
+
+        # Crear una instancia de la clase Cuenta con los datos del documento
+        cuenta_origen = Cuenta(
+            titular=documento_aleatorio['titular'],
+            no_cuenta=documento_aleatorio['no_cuenta'],
+            nip=documento_aleatorio['nip'],
+            saldo=documento_aleatorio['saldo']
+        )
+
+        documento_aleatorio = random.choice(documentos)
+
+        # Crear una instancia de la clase Cuenta con los datos del documento
+        cuenta_destino = Cuenta(
+            titular=documento_aleatorio['titular'],
+            no_cuenta=documento_aleatorio['no_cuenta'],
+            nip=documento_aleatorio['nip'],
+            saldo=documento_aleatorio['saldo']
+        )
+
+        hilo = threading.Thread(
+            target=transferencia, args=(cuenta_origen, cuenta_destino, random.randint(10,500), coleccion))
+        
+        
+        hilos.append(hilo)
+
+        # Iniciar cada hilo
+    for hilo in hilos:
+        hilo.start()
+
+    # Esperar a que cada hilo termine
+    for hilo in hilos:
+        hilo.join()
+
+    cliente.close()
 
 
-    cuentas_modificadas = []
 
-    for documento in resultados:
-        cuenta = Cuenta(
-            documento["titular"], documento["no_cuenta"], documento["nip"], documento["saldo"])
-        # Modifica la instancia según tus necesidades
-        if cuenta.no_cuenta == cuenta_origen:
-            envio = cuenta.retira(saldo, nip_origen)
-        elif cuenta.no_cuenta == cuenta_destino:
-            recivio = cuenta.deposita(saldo)
-            
-      
-        cuentas_modificadas.append(cuenta)
-
-    # Actualiza la base de datos con las instancias modificadas
-    if envio and recivio == True:
-        for cuenta_modificada in cuentas_modificadas:
-            coleccion.update_one({"no_cuenta": cuenta_modificada.no_cuenta}, {
-                                "$set": {"saldo": cuenta_modificada.saldo}})
-        return True
-    else:
-        return False
-
-if __name__ == "__main__":
-    print(transfiere(1, 123, 3, 200))
-    print(transfiere(2, 457, 3, 300))
 
 
 

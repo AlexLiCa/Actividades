@@ -38,9 +38,6 @@ def trans():
         destino = int(request.form['cuenta_destino'])
         cantidad = float(request.form['cantidad'])
 
-        # print(origen)
-        # print(destino)
-        # print(cantidad)
 
         cuenta_origen = buscar_cuenta(origen, coleccion)
         cuenta_destino = buscar_cuenta(destino, coleccion)

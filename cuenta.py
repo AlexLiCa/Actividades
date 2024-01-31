@@ -68,32 +68,30 @@ def crea_cuenta(titular: str, nip: int, saldo: float = 0):
     cliente.close()
 
 
+def buscar_y_cargar_cuenta(no_cuenta: int, cliente):
+
+    cuenta_data = coleccion.find_one({"no_cuenta": no_cuenta})
+    if cuenta_data is not None:
+        cuenta = Cuenta(
+            titular=cuenta_data["titular"],
+            no_cuenta=cuenta_data["no_cuenta"],
+            nip=cuenta_data["nip"],
+            saldo=cuenta_data["saldo"]
+        )
+        return cuenta
+    else:
+        return None
+
 if __name__ == "__main__":
     cliente = pymongo.MongoClient("mongodb://localhost:27017/")
     db = cliente["banco_distribuidos"]
     coleccion = db["Cuentas"]
     documentos = list(coleccion.find())
 
-    num_hilos = 3
-    hilos = []
-
-    for i in range(num_hilos):
-        doc_origen = random.choice(documentos)
-        doc_destino = random.choice(documentos)
-
-        cuenta_origen = Cuenta(
-            doc_origen['titular'], doc_origen['no_cuenta'], doc_origen['nip'], doc_origen['saldo'])
-        cuenta_destino = Cuenta(
-            doc_destino['titular'], doc_destino['no_cuenta'], doc_destino['nip'], doc_destino['saldo'])
-
-        hilo = threading.Thread(target=transferencia, args=(
-            cuenta_origen, cuenta_destino, random.randint(10, 300), coleccion))
-        hilos.append(hilo)
-
-    for hilo in hilos:
-        hilo.start()
-
-    for hilo in hilos:
-        hilo.join()
+    cuenta = buscar_y_cargar_cuenta(3, coleccion)
+    if cuenta:
+        print("Cuenta encontrada:", cuenta.titular)
+    else:
+        print("Cuenta no encontrada")
 
     cliente.close()

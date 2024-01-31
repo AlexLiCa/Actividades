@@ -68,7 +68,7 @@ def crea_cuenta(titular: str, nip: int, saldo: float = 0):
     cliente.close()
 
 
-def buscar_y_cargar_cuenta(no_cuenta: int, cliente):
+def buscar_cuenta(no_cuenta: int, cliente):
 
     cuenta_data = coleccion.find_one({"no_cuenta": no_cuenta})
     if cuenta_data is not None:
@@ -88,7 +88,7 @@ if __name__ == "__main__":
     coleccion = db["Cuentas"]
     documentos = list(coleccion.find())
 
-    cuenta = buscar_y_cargar_cuenta(3, coleccion)
+    cuenta = buscar_cuenta(3, coleccion)
     if cuenta:
         print("Cuenta encontrada:", cuenta.titular)
     else:

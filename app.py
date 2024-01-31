@@ -5,12 +5,10 @@ from cuenta import Cuenta
 
 app = Flask(__name__)
 
-
 def obtener_coleccion():
     cliente = pymongo.MongoClient("mongodb://localhost:27017/")
     db = cliente["banco_distribuidos"]
     return db["Cuentas"]
-
 
 @app.route('/')
 def inicio():
@@ -39,7 +37,7 @@ def trans():
         print("No se pusieron datos validos")
 
     print(
-        f"Titular: {titular}: \n Cuenta: {no_cuenta}.  \nMonto: {cantidad}"
+        f"Titular: {titular}.\nCuenta: {no_cuenta}. \nMonto: {cantidad}"
         )
     
     return redirect(url_for('inicio'))
@@ -55,7 +53,7 @@ def retiros():
         print("No se pusieron datos validos")
 
     print(
-        f"Titular: {titular}: \nCuenta: {no_cuenta}.\nMonto: {cantidad}"
+        f"Titular: {titular}. \nCuenta: {no_cuenta}.\nMonto: {cantidad}"
     )
 
     return redirect(url_for('inicio'))
@@ -71,7 +69,7 @@ def depositos():
         print("No se pusieron datos validos")
 
     print(
-        f"Titular: {titular}: \nCuenta: {no_cuenta}.  \nMonto:{cantidad}"
+        f"Titular: {titular}. \nCuenta: {no_cuenta}.  \nMonto:{cantidad}"
     )
 
     return redirect(url_for('inicio'))

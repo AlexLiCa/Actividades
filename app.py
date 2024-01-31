@@ -34,15 +34,28 @@ def depositar():
 @app.route('/trans', methods=['POST'])
 def trans():
     try:
-        titular = request.form['titular']
-        no_cuenta = int(request.form['no_cuenta'])
+        origen = int(request.form['cuenta_origen'])
+        destino = int(request.form['cuenta_destino'])
         cantidad = float(request.form['cantidad'])
+
+        # print(origen)
+        # print(destino)
+        # print(cantidad)
+
+        cuenta_origen = buscar_cuenta(origen, coleccion)
+        cuenta_destino = buscar_cuenta(destino, coleccion)
+
+
+        if cuenta_origen and cuenta_destino:
+            transferencia = cuenta_origen.transfiere(cuenta_destino, cantidad, coleccion)
+
+        if transferencia:
+            print("Se transfirio exitosamente")
+        else:
+            print("No se pudo transferir")
     except:
         print("No se pusieron datos validos")
 
-    print(
-        f"Titular: {titular}.\nCuenta: {no_cuenta}. \nMonto: {cantidad}"
-        )
     
     return redirect(url_for('inicio'))
 
@@ -59,10 +72,9 @@ def retiros():
 
         if cuenta and cantidad:
             retiro = cuenta.retira(cantidad, nip)
-            print(retiro)
 
         if retiro:
-            print("Se retiro exitoso")
+            print("Se retiro exitosamente")
         else:
             print("No se pudo retirar")
     except:

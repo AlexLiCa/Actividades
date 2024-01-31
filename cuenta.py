@@ -45,8 +45,6 @@ class Cuenta:
 
         if self.retira(monto, self.nip):
             if cuenta_destino.deposita(monto):
-                print(
-                    f"{self.titular} transfirio {monto}. a {cuenta_destino.titular} \n")
                 return True
 
         return False

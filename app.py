@@ -1,9 +1,13 @@
 from flask import Flask, render_template, request, redirect, url_for
 import pymongo
 # Asegúrate de importar tu clase Cuenta desde el módulo correspondiente
-from cuenta import Cuenta
+from cuenta import Cuenta, buscar_cuenta
 
 app = Flask(__name__)
+cliente = pymongo.MongoClient("mongodb://localhost:27017/")
+db = cliente["banco_distribuidos"]
+coleccion = db["Cuentas"]
+
 
 def obtener_coleccion():
     cliente = pymongo.MongoClient("mongodb://localhost:27017/")
@@ -48,13 +52,23 @@ def retiros():
     try:
         titular = request.form['titular']
         no_cuenta = int(request.form['no_cuenta'])
+        nip = int(request.form['nip'])
         cantidad = float(request.form['cantidad'])
+
+        cuenta = buscar_cuenta(no_cuenta, coleccion)
+
+        if cuenta and cantidad:
+            retiro = cuenta.retira(cantidad, nip)
+            print(retiro)
+
+        if retiro:
+            print("Se retiro exitoso")
+        else:
+            print("No se pudo retirar")
     except:
         print("No se pusieron datos validos")
 
-    print(
-        f"Titular: {titular}. \nCuenta: {no_cuenta}.\nMonto: {cantidad}"
-    )
+
 
     return redirect(url_for('inicio'))
 
@@ -65,9 +79,23 @@ def depositos():
         titular = request.form['titular']
         no_cuenta = int(request.form['no_cuenta'])
         cantidad = float(request.form['cantidad'])
+        
+        cuenta = buscar_cuenta(no_cuenta, coleccion)
+
+        if cuenta and cantidad:
+            deposito = cuenta.deposita(cantidad)
+
+        if deposito:
+            print("Deposito exitoso")
+        else:
+            print("no se pudo depositar")
+
     except:
         print("No se pusieron datos validos")
+    
 
+
+    
     print(
         f"Titular: {titular}. \nCuenta: {no_cuenta}.  \nMonto:{cantidad}"
     )

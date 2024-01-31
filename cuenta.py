@@ -3,6 +3,9 @@ from pprint import pprint
 import threading
 import random
 
+cliente = pymongo.MongoClient("mongodb://localhost:27017/")
+db = cliente["banco_distribuidos"]
+coleccion = db["Cuentas"]
 
 class Cuenta:
     def __init__(self, titular: str, no_cuenta: int, nip: int, saldo: float) -> None:
@@ -16,20 +19,20 @@ class Cuenta:
         if nip_recibido != self.nip:
             return False
 
-        with self.lock_saldo:
-            if cantidad > 0 and self.saldo >= cantidad:
-                self.saldo -= cantidad
-                return True
-            else:
-                return False
+        if cantidad > 0 and self.saldo >= cantidad:
+            self.saldo -= cantidad
+            self.actualiza_saldo_en_bd(coleccion)
+            return True
+        else:
+            return False
 
     def deposita(self, cantidad: float):
-        with self.lock_saldo:
-            if cantidad > 0:
-                self.saldo += cantidad
-                return True
-            else:
-                return False
+        if cantidad > 0:
+            self.saldo += cantidad
+            self.actualiza_saldo_en_bd(coleccion)
+            return True
+        else:
+            return False
 
     def actualiza_saldo_en_bd(self, coleccion):
         with self.lock_saldo:
@@ -42,8 +45,6 @@ class Cuenta:
 
         if self.retira(monto, self.nip):
             if cuenta_destino.deposita(monto):
-                self.actualiza_saldo_en_bd(coleccion)
-                cuenta_destino.actualiza_saldo_en_bd(coleccion)
                 print(
                     f"{self.titular} transfirio {monto}. a {cuenta_destino.titular} \n")
                 return True
@@ -83,15 +84,9 @@ def buscar_cuenta(no_cuenta: int, cliente):
         return None
 
 if __name__ == "__main__":
-    cliente = pymongo.MongoClient("mongodb://localhost:27017/")
-    db = cliente["banco_distribuidos"]
-    coleccion = db["Cuentas"]
     documentos = list(coleccion.find())
 
-    cuenta = buscar_cuenta(3, coleccion)
-    if cuenta:
-        print("Cuenta encontrada:", cuenta.titular)
-    else:
-        print("Cuenta no encontrada")
+    cuenta = buscar_cuenta(2, coleccion)
+    pprint(vars(cuenta))
+    print(cuenta.deposita(200))
 
-    cliente.close()

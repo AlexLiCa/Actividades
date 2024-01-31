@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='estilos.css') }}">
+</head>
+
+<body>
+    <h2>Transferencia</h2>
+    <form action="/trans" method="post">
+        Titular: <input type="text" name="titular" required><br>
+        Número de Cuenta: <input type="number" name="no_cuenta" required><br>
+        Cantidad: <input type="number" name="cantidad" required><br>
+        <input type="submit" name="submit" value="Transferirr">
+    </form>
+</body>
+
+</html>

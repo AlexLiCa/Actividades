@@ -1,0 +1,68 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+h2 {
+    color: #333;
+    margin: 30px auto;
+    width: 50%; /* Puedes ajustar esto según tus necesidades */
+    text-align: center; /* Esto centra el texto dentro del h2 */
+}
+
+
+form {
+    background-color: white;
+    padding: 20px;
+    margin: 30px auto;
+    width: 300px;
+    border: 1px solid #ddd;
+}
+
+.boton {
+    display: inline-block;
+    margin: 10px;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.botones-centrados {
+    display: flex;
+    align-items: center; /* Alinea verticalmente al centro */
+    flex-direction: column; /* Coloca los botones en columna */
+    height: 100vh; /* Opcional: Ajusta la altura para centrar verticalmente en la página */
+}
+
+.boton:hover {
+    background-color: #45a049;
+}
+
+
+input[type=text],
+input[type=number],
+input[type=password] {
+    width: 95%;
+    padding: 10px;
+    margin: 5px 0 22px 0;
+    border: none;
+    background: #f1f1f1;
+}
+
+input[type=submit] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+}
+
+input[type=submit]:hover {
+    background-color: #45a049;
+}

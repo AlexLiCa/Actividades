@@ -1,0 +1,19 @@
+
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='estilos.css') }}">
+</head>
+
+<body>
+    <h2>Bienvenido al Sistema Bancario</h2>
+    <div class="botones-centrados">
+        <a href="{{ url_for('transferencia') }}" class="boton">Ir a Transferencias</a>
+        <a href="{{ url_for('retirar') }}" class="boton">Retirar</a> 
+        <a href="{{ url_for('depositar') }}" class="boton">Depositar</a>
+    </div>
+</body>
+
+</html>
